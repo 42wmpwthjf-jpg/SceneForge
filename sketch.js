@@ -12,6 +12,7 @@ let randomValue = seed;
 
 let triangleCount = 0;
 let transformCount = 0;
+let drawnShapeCount = 0;
 
 let cameraMode = "perspective";
 
@@ -41,6 +42,8 @@ function setup() {
 
   createCanvas(920, 680, WEBGL);
 
+  textFont("Arial");
+
   createObjects();
 
   runMeasurements();
@@ -60,23 +63,33 @@ function draw() {
 
 
   if (currentView === 1) {
+
     patternView();
+
   }
 
   else if (currentView === 2) {
+
     recursiveDesign();
+
   }
 
   else if (currentView === 3) {
+
     motionView();
+
   }
 
   else if (currentView === 4) {
+
     cameraView();
+
   }
 
   else if (currentView === 5) {
+
     resultsView();
+
   }
 
 
@@ -84,7 +97,7 @@ function draw() {
 }
 
 
-// Random generator
+// Seeded random generator for the scene
 
 function nextRandom() {
 
@@ -117,6 +130,7 @@ function createObjects() {
   for (let i = 0; i < shapeCount; i++) {
 
     let row = floor(i / columns);
+
     let column = i % columns;
 
 
@@ -154,6 +168,7 @@ function createObjects() {
     else {
 
       type = "triangle";
+
     }
 
 
@@ -194,8 +209,11 @@ function createObjects() {
       rotation: rotation,
 
       scaleValue: scaleValue
+
     });
+
   }
+
 }
 
 
@@ -205,50 +223,47 @@ function drawHeader() {
 
   push();
 
-  resetMatrix();
+  camera();
 
-  translate(
+  ortho(
     -width / 2,
-    -height / 2
+    width / 2,
+    -height / 2,
+    height / 2,
+    -1000,
+    1000
   );
-
 
   fill(35, 50, 70);
 
   noStroke();
 
+  textAlign(LEFT, TOP);
 
   textSize(20);
 
   text(
     "SceneForge - Raghad 202316327",
-    25,
-    30
+    -width / 2 + 25,
+    -height / 2 + 20
   );
-
 
   textSize(13);
 
   text(
     "1 Pattern | 2 Recursive Design | 3 Motion | 4 Camera | 5 Results",
-    25,
-    55
+    -width / 2 + 25,
+    -height / 2 + 55
   );
-
 
   text(
-    "Seed: " +
-    seed +
-    "   Objects: " +
-    shapeCount +
-    "   Palette: " +
-    paletteSize +
-    "   Depth: " +
-    fractalDepth,
-    25,
-    80
+    "Seed: " + seed +
+    "   Objects: " + shapeCount +
+    "   Palette: " + paletteSize +
+    "   Depth: " + fractalDepth,
+    -width / 2 + 25,
+    -height / 2 + 80
   );
-
 
   pop();
 }
@@ -261,6 +276,8 @@ function patternView() {
   push();
 
   translate(0, 70);
+
+  drawnShapeCount = 0;
 
 
   for (
@@ -305,8 +322,11 @@ function patternView() {
       obj.size
     );
 
+    drawnShapeCount++;
+
 
     pop();
+
   }
 
 
@@ -315,7 +335,7 @@ function patternView() {
 
   showMessage(
     "Module 1 - Pattern View | Objects: " +
-    shapeCount
+    drawnShapeCount
   );
 }
 
@@ -331,6 +351,7 @@ function drawObject(type, size) {
       0,
       size
     );
+
   }
 
 
@@ -344,6 +365,7 @@ function drawObject(type, size) {
       size,
       size
     );
+
   }
 
 
@@ -359,10 +381,15 @@ function drawObject(type, size) {
 
       size * 0.5,
       size * 0.4
+
     );
+
   }
+
 }
 
+
+// MODULE 2
 
 // MODULE 2
 
@@ -370,17 +397,12 @@ function recursiveDesign() {
 
   triangleCount = 0;
 
-
   push();
 
   translate(
     0,
     80
   );
-
-
-  noStroke();
-
 
   makeFractal(
 
@@ -393,9 +415,11 @@ function recursiveDesign() {
     0,
     270,
 
-    fractalDepth
-  );
+    fractalDepth,
 
+    0
+
+  );
 
   pop();
 
@@ -409,116 +433,59 @@ function recursiveDesign() {
 
 // Sierpinski recursion
 
-function makeFractal(
-  x1,
-  y1,
-  x2,
-  y2,
-  x3,
-  y3,
-  depth
-) {
+function makeFractal(x1,y1,x2,y2,x3,y3,depth,level) {
 
+  let colorIndex = level % paletteSize;
+  let c = colors[colorIndex];
 
-  // Base case
+  stroke(c[0], c[1], c[2]);
+  strokeWeight(2);
 
   if (depth === 0) {
-
     triangleCount++;
 
-
-    // Red color
-
-    fill(
-      237,
-      49,
-      19
-    );
-
-
-    triangle(
-
-      x1,
-      y1,
-
-      x2,
-      y2,
-
-      x3,
-      y3
-    );
-
+    fill(c[0], c[1], c[2]);
+    triangle(x1,y1,x2,y2,x3,y3);
 
     return;
   }
 
+  noFill();
+  triangle(x1,y1,x2,y2,x3,y3);
 
-  let mid12X =
-    (x1 + x2) / 2;
+  let mid12X = (x1+x2)/2;
+  let mid12Y = (y1+y2)/2;
 
-  let mid12Y =
-    (y1 + y2) / 2;
+  let mid23X = (x2+x3)/2;
+  let mid23Y = (y2+y3)/2;
 
-
-  let mid23X =
-    (x2 + x3) / 2;
-
-  let mid23Y =
-    (y2 + y3) / 2;
-
-
-  let mid31X =
-    (x3 + x1) / 2;
-
-  let mid31Y =
-    (y3 + y1) / 2;
-
+  let mid31X = (x3+x1)/2;
+  let mid31Y = (y3+y1)/2;
 
   makeFractal(
-
-    x1,
-    y1,
-
-    mid12X,
-    mid12Y,
-
-    mid31X,
-    mid31Y,
-
-    depth - 1
+    x1,y1,
+    mid12X,mid12Y,
+    mid31X,mid31Y,
+    depth-1,
+    level+1
   );
 
-
   makeFractal(
-
-    mid12X,
-    mid12Y,
-
-    x2,
-    y2,
-
-    mid23X,
-    mid23Y,
-
-    depth - 1
+    mid12X,mid12Y,
+    x2,y2,
+    mid23X,mid23Y,
+    depth-1,
+    level+2
   );
 
-
   makeFractal(
-
-    mid31X,
-    mid31Y,
-
-    mid23X,
-    mid23Y,
-
-    x3,
-    y3,
-
-    depth - 1
+    mid31X,mid31Y,
+    mid23X,mid23Y,
+    x3,y3,
+    depth-1,
+    level+3
   );
 }
-
 
 // MODULE 3
 
@@ -610,6 +577,7 @@ function motionView() {
 
 
     pop();
+
   }
 
 
@@ -641,7 +609,9 @@ function cameraView() {
       1,
 
       3000
+
     );
+
   }
 
 
@@ -657,7 +627,9 @@ function cameraView() {
 
       1,
       3000
+
     );
+
   }
 
 
@@ -689,6 +661,7 @@ function cameraView() {
     0,
     1,
     0
+
   );
 
 
@@ -704,6 +677,7 @@ function cameraView() {
     -0.5,
     0.5,
     -1
+
   );
 
 
@@ -733,6 +707,7 @@ function cameraView() {
       obj.y * 0.55,
 
       z
+
     );
 
 
@@ -751,6 +726,7 @@ function cameraView() {
       c[0],
       c[1],
       c[2]
+
     );
 
 
@@ -761,6 +737,7 @@ function cameraView() {
       sphere(
         obj.size * 0.35
       );
+
     }
 
 
@@ -775,7 +752,9 @@ function cameraView() {
         obj.size * 0.65,
 
         obj.size * 0.40
+
       );
+
     }
 
 
@@ -786,11 +765,14 @@ function cameraView() {
         obj.size * 0.35,
 
         obj.size * 0.75
+
       );
+
     }
 
 
     pop();
+
   }
 
 
@@ -798,11 +780,15 @@ function cameraView() {
 
   push();
 
-  resetMatrix();
+  camera();
 
-  translate(
+  ortho(
     -width / 2,
-    -height / 2
+    width / 2,
+    -height / 2,
+    height / 2,
+    -1000,
+    1000
   );
 
 
@@ -814,13 +800,15 @@ function cameraView() {
 
   noStroke();
 
+  textAlign(LEFT, TOP);
+
 
   textSize(20);
 
   text(
     "Module 4 - Camera View",
-    25,
-    115
+    -width / 2 + 25,
+    -height / 2 + 115
   );
 
 
@@ -829,8 +817,8 @@ function cameraView() {
   text(
     "Current Projection: " +
     cameraMode,
-    25,
-    145
+    -width / 2 + 25,
+    -height / 2 + 145
   );
 
 
@@ -838,15 +826,15 @@ function cameraView() {
 
   text(
     "Press P = Perspective",
-    25,
-    175
+    -width / 2 + 25,
+    -height / 2 + 175
   );
 
 
   text(
     "Press O = Orthographic",
-    25,
-    200
+    -width / 2 + 25,
+    -height / 2 + 200
   );
 
 
@@ -879,11 +867,15 @@ function resultsView() {
 
   push();
 
-  resetMatrix();
+  camera();
 
-  translate(
+  ortho(
     -width / 2,
-    -height / 2
+    width / 2,
+    -height / 2,
+    height / 2,
+    -1000,
+    1000
   );
 
 
@@ -895,13 +887,15 @@ function resultsView() {
 
   noStroke();
 
+  textAlign(LEFT, TOP);
+
 
   textSize(22);
 
   text(
     "Module 5 - Results",
-    35,
-    125
+    -width / 2 + 35,
+    -height / 2 + 125
   );
 
 
@@ -911,16 +905,16 @@ function resultsView() {
   text(
     "Objects drawn per frame: " +
     shapeCount,
-    35,
-    160
+    -width / 2 + 35,
+    -height / 2 + 160
   );
 
 
   text(
     "Recursive triangles: " +
     triangleCount,
-    35,
-    185
+    -width / 2 + 35,
+    -height / 2 + 185
   );
 
 
@@ -929,31 +923,31 @@ function resultsView() {
     fractalDepth +
     " = " +
     expectedTriangles,
-    35,
-    210
+    -width / 2 + 35,
+    -height / 2 + 210
   );
 
 
   text(
     "Transform operations: " +
     totalTransforms,
-    35,
-    235
+    -width / 2 + 35,
+    -height / 2 + 235
   );
 
 
   text(
     "Maximum recursion level: " +
     fractalDepth,
-    35,
-    260
+    -width / 2 + 35,
+    -height / 2 + 260
   );
 
 
   text(
     "Complexity: O(3^d)",
-    35,
-    285
+    -width / 2 + 35,
+    -height / 2 + 285
   );
 
 
@@ -963,8 +957,8 @@ function resultsView() {
 
   text(
     "Graph A - Triangles vs Depth",
-    480,
-    145
+    -width / 2 + 480,
+    -height / 2 + 145
   );
 
 
@@ -976,18 +970,18 @@ function resultsView() {
 
 
   line(
-    480,
-    360,
-    870,
-    360
+    -width / 2 + 480,
+    -height / 2 + 360,
+    -width / 2 + 870,
+    -height / 2 + 360
   );
 
 
   line(
-    480,
-    180,
-    480,
-    360
+    -width / 2 + 480,
+    -height / 2 + 180,
+    -width / 2 + 480,
+    -height / 2 + 360
   );
 
 
@@ -1001,10 +995,11 @@ function resultsView() {
   ) {
 
     let x =
-      500 + i * 85;
+      -width / 2 + 500 + i * 85;
 
 
     let y =
+      -height / 2 +
       360 -
       map(
         triangleResults[i],
@@ -1032,10 +1027,13 @@ function resultsView() {
     if (i > 0) {
 
       let oldX =
-        500 + (i - 1) * 85;
+        -width / 2 +
+        500 +
+        (i - 1) * 85;
 
 
       let oldY =
+        -height / 2 +
         360 -
         map(
           triangleResults[i - 1],
@@ -1062,6 +1060,7 @@ function resultsView() {
 
 
       noStroke();
+
     }
 
 
@@ -1075,15 +1074,16 @@ function resultsView() {
     text(
       testDepths[i],
       x - 3,
-      380
+      -height / 2 + 380
     );
+
   }
 
 
   text(
     "Depth",
-    650,
-    400
+    -width / 2 + 650,
+    -height / 2 + 400
   );
 
 
@@ -1093,8 +1093,8 @@ function resultsView() {
 
   text(
     "Graph B - Objects vs Scene Size",
-    480,
-    440
+    -width / 2 + 480,
+    -height / 2 + 440
   );
 
 
@@ -1106,18 +1106,18 @@ function resultsView() {
 
 
   line(
-    480,
-    635,
-    870,
-    635
+    -width / 2 + 480,
+    -height / 2 + 635,
+    -width / 2 + 870,
+    -height / 2 + 635
   );
 
 
   line(
-    480,
-    475,
-    480,
-    635
+    -width / 2 + 480,
+    -height / 2 + 475,
+    -width / 2 + 480,
+    -height / 2 + 635
   );
 
 
@@ -1131,10 +1131,11 @@ function resultsView() {
   ) {
 
     let x =
-      500 + i * 85;
+      -width / 2 + 500 + i * 85;
 
 
     let y =
+      -height / 2 +
       635 -
       map(
         shapeResults[i],
@@ -1162,10 +1163,13 @@ function resultsView() {
     if (i > 0) {
 
       let oldX =
-        500 + (i - 1) * 85;
+        -width / 2 +
+        500 +
+        (i - 1) * 85;
 
 
       let oldY =
+        -height / 2 +
         635 -
         map(
           shapeResults[i - 1],
@@ -1192,6 +1196,7 @@ function resultsView() {
 
 
       noStroke();
+
     }
 
 
@@ -1205,15 +1210,16 @@ function resultsView() {
     text(
       testSizes[i],
       x - 6,
-      655
+      -height / 2 + 655
     );
+
   }
 
 
   text(
     "Scene Size",
-    640,
-    675
+    -width / 2 + 640,
+    -height / 2 + 675
   );
 
 
@@ -1282,6 +1288,7 @@ function runMeasurements() {
       total =
         total +
         pow(3, depth);
+
     }
 
 
@@ -1292,6 +1299,7 @@ function runMeasurements() {
     triangleResults.push(
       average
     );
+
   }
 
 
@@ -1318,6 +1326,7 @@ function runMeasurements() {
 
       total =
         total + size;
+
     }
 
 
@@ -1328,7 +1337,9 @@ function runMeasurements() {
     shapeResults.push(
       average
     );
+
   }
+
 }
 
 
@@ -1338,11 +1349,15 @@ function showMessage(message) {
 
   push();
 
-  resetMatrix();
+  camera();
 
-  translate(
+  ortho(
     -width / 2,
-    -height / 2
+    width / 2,
+    -height / 2,
+    height / 2,
+    -1000,
+    1000
   );
 
 
@@ -1354,13 +1369,15 @@ function showMessage(message) {
 
   noStroke();
 
+  textAlign(LEFT, TOP);
+
   textSize(14);
 
 
   text(
     message,
-    25,
-    height - 25
+    -width / 2 + 25,
+    height / 2 - 35
   );
 
 
@@ -1376,30 +1393,35 @@ function keyPressed() {
   if (key === "1") {
 
     currentView = 1;
+
   }
 
 
   else if (key === "2") {
 
     currentView = 2;
+
   }
 
 
   else if (key === "3") {
 
     currentView = 3;
+
   }
 
 
   else if (key === "4") {
 
     currentView = 4;
+
   }
 
 
   else if (key === "5") {
 
     currentView = 5;
+
   }
 
 
@@ -1411,7 +1433,9 @@ function keyPressed() {
     if (currentView === 4) {
 
       cameraMode = "perspective";
+
     }
+
   }
 
 
@@ -1423,6 +1447,9 @@ function keyPressed() {
     if (currentView === 4) {
 
       cameraMode = "orthographic";
+
     }
+
   }
+
 }

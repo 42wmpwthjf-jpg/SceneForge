@@ -582,6 +582,30 @@ function motionView() {
 
 
   pop();
+    // Order Matters Demo
+
+  push();
+
+  translate(-220, 230);
+  rotate(frameCount * 0.02);
+
+  fill(245, 130, 48);
+  rectMode(CENTER);
+  rect(0, 0, 70, 40);
+
+  pop();
+
+
+  push();
+
+  rotate(frameCount * 0.02);
+  translate(220, 230);
+
+  fill(95, 70, 170);
+  rectMode(CENTER);
+  rect(0, 0, 70, 40);
+
+  pop();
 
 
   showMessage(
